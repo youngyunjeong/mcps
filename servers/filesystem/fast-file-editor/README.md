@@ -114,6 +114,91 @@ Simulated editing 5 distinct locations across a 1,000-line file where each edit 
 | **Wasted Context Tokens** | **~50,000 tokens** (800 lines x 5) | **0 tokens** | **Zero context waste** |
 | **Line-drift Error Rate** | High (fails if offset not recalculated) | **0% (uniqueness guaranteed)** | 100% deterministic |
 
+## Installation & Setup
+
+### Option 1: Pre-compiled Binaries (No Rust Required)
+
+You do **not** need to install Rust to use `fast-file-editor`. Pre-compiled binaries for macOS (Apple Silicon / Intel / Universal), Linux (x86_64), and Windows (x86_64) are available on the [GitHub Releases Page](https://github.com/youngyunjeong/mcps/releases).
+
+#### Automatic One-Line Install (macOS / Linux)
+Installs the appropriate pre-compiled binary for your OS and architecture into `~/.local/bin/`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/youngyunjeong/mcps/main/install.sh | bash
+```
+
+#### Manual Download
+Download the release archive for your platform from [Releases](https://github.com/youngyunjeong/mcps/releases/tag/v0.1.0):
+- **macOS Apple Silicon (ARM64)**: `fast-file-editor-v0.1.0-aarch64-apple-darwin.tar.gz`
+- **macOS Intel (x86_64)**: `fast-file-editor-v0.1.0-x86_64-apple-darwin.tar.gz`
+- **macOS Universal (ARM64 + x86_64)**: `fast-file-editor-v0.1.0-universal-apple-darwin.tar.gz`
+- **Linux (x86_64)**: `fast-file-editor-v0.1.0-x86_64-unknown-linux-gnu.tar.gz`
+- **Windows (x86_64)**: `fast-file-editor-v0.1.0-x86_64-pc-windows-gnu.zip`
+
+Extract the binary and place it in your `PATH` (e.g. `~/.local/bin/` on Unix, or in your project folder on Windows).
+
+---
+
+### Option 2: Build From Source (Requires Rust)
+
+If you prefer building from source:
+
+```bash
+git clone https://github.com/youngyunjeong/mcps.git
+cd mcps/servers/filesystem/fast-file-editor
+cargo build --release
+cp target/release/fast-file-editor ~/.local/bin/
+```
+
+#### Run Unit Tests
+```bash
+cargo test
+```
+
+---
+
+### Agent Configuration
+
+Add `fast-file-editor` to your agent configuration:
+
+#### Google Antigravity (AGY)
+Add to `~/.gemini/config/mcp_config.json`:
+```json
+{
+  "mcpServers": {
+    "fast-file-editor": {
+      "command": "fast-file-editor",
+      "args": []
+    }
+  }
+}
+```
+
+#### Claude Desktop
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\\Claude\\claude_desktop_config.json` (Windows):
+```json
+{
+  "mcpServers": {
+    "fast-file-editor": {
+      "command": "fast-file-editor",
+      "args": []
+    }
+  }
+}
+```
+
+#### Cursor
+Add to `.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "fast-file-editor": {
+      "command": "fast-file-editor"
+    }
+  }
+}
+```
+
 ---
 
 ## Architecture & Implementation Details
@@ -123,26 +208,6 @@ Simulated editing 5 distinct locations across a 1,000-line file where each edit 
 * **Minimal Memory Footprint**: Uses **1-2 MB RAM** during execution (Node.js processes typically consume 30-50 MB).
 * **Synchronous Stdio Loop**: Operates over standard input and standard output without heavy asynchronous runtime overhead (`tokio` not needed for sequential JSON-RPC turns).
 * **SIMD Byte Search**: Leverages optimized byte matching for newline counting and substring location.
-
----
-
-## Building & Testing
-
-### Build Release Binary
-```bash
-cargo build --release
-```
-The optimized executable will be located at `target/release/fast-file-editor`.
-
-### Run Automated Unit Tests
-```bash
-cargo test
-```
-The test suite validates:
-- Single unique match atomic replacement.
-- Error handling when `old_str` does not exist.
-- Error handling when `old_str` matches multiple locations.
-- Line slicing and 1-indexed formatting in `view_file_fast`.
 
 ---
 
