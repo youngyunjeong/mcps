@@ -1,38 +1,52 @@
 # MCPs
 
-Reusable, high-performance Model Context Protocol (MCP) servers for AI coding agents.
-Works with any agent harness that supports the standard MCP stdio protocol: Google Antigravity (AGY), Claude Code, Claude Desktop, Cursor, Codex, Windsurf, and custom harnesses.
+A curated collection of high-performance, reusable Model Context Protocol (MCP) servers tailored for AI coding agents.
+Works seamlessly with any agent harness supporting standard MCP stdio communication: Google Antigravity (AGY), Claude Code, Claude Desktop, Cursor, Codex, and Windsurf.
 
-Servers here are project-agnostic on purpose.
-They carry no environment variables, no service names, and no domain rules from the projects they were extracted from.
-All servers prioritize minimal resource usage, zero-cold-start execution, and deterministic behavior.
+## Philosophy
+
+Most off-the-shelf MCP servers introduce heavy runtime footprints (Node.js/V8 cold starts, Python virtual environments, dozens of nested dependencies).
+The servers in this collection are built with a different philosophy:
+
+1. **Zero Runtime Dependencies**: Written in native languages like Rust with standalone binary distribution.
+2. **Instant Startup (< 1ms)**: No interpreter warmup or JIT compilation; eliminates agent loop delays.
+3. **Project Agnostic**: Completely free of project-specific paths, environment variables, credentials, or domain assumptions.
+4. **Deterministic & Safe**: Atomic filesystem operations, strict error contracts, and zero silent failures.
 
 ## Catalog
 
 ### Filesystem
 
-Repository path: `servers/filesystem/`
+| Server | Language | Description | Link |
+| :--- | :--- | :--- | :--- |
+| **`fast-file-editor`** | Rust | Ultra-fast file viewer without payload truncation (bypasses 800-line/45KB limits) and atomic unique string replacement (`str_replace`) that eliminates line-drift re-read penalties. | [View Docs](servers/filesystem/fast-file-editor/) |
 
-| Server | Language | Use it for |
-| --- | --- | --- |
-| [`fast-file-editor`](servers/filesystem/fast-file-editor/) | Rust | Ultra-fast file inspection without truncation caps (bypassing 800-line/45KB limits) and atomic unique string replacement (`str_replace`) without line-drift re-read penalties. |
+*(More categories and servers will be added as common agent bottlenecks are identified).*
 
 ## Quick Start
 
-### 1. Build the Binary
+### 1. Build & Install a Server
 
-All Rust-based servers compile into single, standalone native binaries with zero external runtime dependencies.
+Each server in `servers/` is self-contained. To build and install a Rust-based server:
 
 ```bash
+# Clone the repository
 git clone https://github.com/youngyunjeong/mcps.git
 cd mcps/servers/filesystem/fast-file-editor
+
+# Build optimized release binary (~390 KB)
 cargo build --release
+
+# Install to your PATH
 cp target/release/fast-file-editor ~/.local/bin/
 ```
 
-### 2. Configure Your Agent
+### 2. Client Setup
 
-#### Google Antigravity (AGY)
+Configure your coding agent harness to launch the server over `stdio`:
+
+<details>
+<summary><b>Google Antigravity (AGY)</b></summary>
 
 Add to `~/.gemini/config/mcp_config.json`:
 
@@ -46,10 +60,12 @@ Add to `~/.gemini/config/mcp_config.json`:
   }
 }
 ```
+</details>
 
-#### Claude Desktop
+<details>
+<summary><b>Claude Desktop / Claude Code</b></summary>
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
@@ -61,8 +77,10 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
   }
 }
 ```
+</details>
 
-#### Cursor
+<details>
+<summary><b>Cursor</b></summary>
 
 Add to `.cursor/mcp.json`:
 
@@ -75,34 +93,26 @@ Add to `.cursor/mcp.json`:
   }
 }
 ```
+</details>
 
-## Benchmark Highlights
-
-Measured on Apple Silicon (ARM64) comparing traditional agent primitives with `fast-file-editor`:
-
-* **Full File Inspection**: Streams a ~1,200-line file (58.8 KB) in **0.80 ms** in a single call, avoiding 800-line/45KB payload truncation.
-* **Distributed Multi-site Editing**: Executes 5 consecutive edits across a 1,000-line file in **2.36 ms** total. Eliminates defensive re-reads completely and saves **~50,000 context tokens** per session.
-
-Detailed benchmark methodology and metrics are available in [`servers/filesystem/fast-file-editor/README.md`](servers/filesystem/fast-file-editor/).
-
-## Structure
+## Repository Layout
 
 ```
 mcps/
-├── README.md               # Catalog and overview
-├── AGENTS.md               # Repository maintenance rules for AI agents
+├── README.md               # Collection catalog, installation matrix, and agent configs
+├── AGENTS.md               # Contributor and AI agent maintenance rules
 ├── CLAUDE.md -> AGENTS.md  # Agent guidelines symlink
 └── servers/
     └── <category>/
         └── <server-name>/
-            ├── README.md   # Server documentation, schemas, and benchmarks
+            ├── README.md   # Server-specific deep dive, tool schemas, and benchmarks
             ├── Cargo.toml  # Package manifest
-            └── src/        # Implementation
+            └── src/        # Server implementation
 ```
 
-## Writing Servers Here
+## Contributing & Development
 
-See [`AGENTS.md`](AGENTS.md) for the maintenance and contribution rules.
+See [`AGENTS.md`](AGENTS.md) for guidelines on adding new servers, coding standards, and portability requirements.
 
 ## License
 
