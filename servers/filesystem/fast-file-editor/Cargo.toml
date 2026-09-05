@@ -1,0 +1,23 @@
+[package]
+name = "fast-file-editor"
+version = "0.1.0"
+edition = "2024"
+description = "High-performance Model Context Protocol (MCP) server for fast file inspection and atomic unique string replacement without line drift."
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/youngyunjeong/mcps"
+
+
+[dev-dependencies]
+tempfile = "3.10"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
