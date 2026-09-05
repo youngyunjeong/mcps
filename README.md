@@ -25,7 +25,17 @@ The servers in this collection are built with a different philosophy:
 
 ## Quick Start
 
-### 1. Build & Install a Server
+### One-Line Binary Install (No Rust Required)
+
+If you don't have Rust installed, install pre-compiled binaries directly for your OS (macOS Apple Silicon/Intel, Linux x86_64):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/youngyunjeong/mcps/main/install.sh | bash
+```
+
+Pre-compiled binaries for macOS, Linux, and Windows are also available directly on the [Releases Page](https://github.com/youngyunjeong/mcps/releases).
+
+### Or Build From Source (Requires Rust)
 
 Each server in `servers/` is self-contained. To build and install a Rust-based server:
 
